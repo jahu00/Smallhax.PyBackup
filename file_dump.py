@@ -24,8 +24,8 @@ class FileDump(Serializable):
             entry.append(file)
         return index
     
-    def compare(self, dst_dump, allow_move=False) -> list[FileOperation]:
-        return FileDump.__compare(self, dst_dump, allow_move)
+    def compare(self, dst_dump, allow_move=False, move_min_size=0) -> list[FileOperation]:
+        return FileDump.__compare(self, dst_dump, allow_move, move_min_size)
 
     @staticmethod
     def from_path(path, index = None, name_index = None):
@@ -60,7 +60,7 @@ class FileDump(Serializable):
         return FileDump(path, file_entries)
     
     @staticmethod
-    def __compare(src_dump, dst_dump, allow_move=False) -> list[FileOperation]:
+    def __compare(src_dump, dst_dump, allow_move=False, move_min_size=0) -> list[FileOperation]:
         src_dump = copy.deepcopy(src_dump)
         dst_dump = copy.deepcopy(dst_dump)
         dst_index = dst_dump.get_index()
@@ -82,10 +82,11 @@ class FileDump(Serializable):
                 if dst_file.size == src_file.size:
                     operations.append(FileOperation('match', src_path, dst_path))
                 else:
+                    operations.append(FileOperation('delete', dst_path))
                     operations.append(FileOperation('copy', src_path, dst_path))
                 continue
 
-            if allow_move and dst_name_entry is not None:
+            if allow_move and src_file.size > move_min_size and dst_name_entry is not None:
                 dst_file = next((x for x in dst_name_entry if x.size == src_file.size), None)
                 if dst_file is not None:
                     dst_dump.files.remove(dst_file)
