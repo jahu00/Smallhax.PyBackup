@@ -16,13 +16,15 @@ class FileOperation(Serializable):
             case "match":
                 pass
             case "copy":
-                self.ensure_path_exists()
+                #self.ensure_path_exists()
                 shutil.copy2(self.src, self.dst)
             case "move":
-                self.ensure_path_exists()
+                #self.ensure_path_exists()
                 shutil.move(self.src_path, self.dst)
             case "delete":
                 os.remove(self.src)
+            case "create":
+                os.makedirs(self.src)
             case _:
                 raise Exception(f"Unsupported operation {self.operation}")
     

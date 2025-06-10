@@ -2,6 +2,7 @@ import os
 import copy
 from serializable import Serializable
 from file_entry import FileEntry
+from file_type import FileType
 from file_operation import FileOperation
 class FileDump(Serializable):
     def __init__(self, path, files: list[FileEntry]):
@@ -33,8 +34,12 @@ class FileDump(Serializable):
             raise ValueError(f"The provided path '{path}' is not a valid directory.")
 
         file_entries = []
+        for root, directories, files in os.walk(path):
+            for directory_name in directories:
+                dir_full_path = os.path.join(root, directory_name)
+                dir_relative_path = os.path.relpath(dir_full_path, start=path)
+                file_entries.append(FileEntry(dir_relative_path, directory_name, None, FileType.Directory))
 
-        for root, _, files in os.walk(path):
             for file_name in files:
                 full_path = os.path.join(root, file_name)
                 relative_path = os.path.relpath(full_path, start=path)
@@ -43,7 +48,8 @@ class FileDump(Serializable):
                 file_entry = FileEntry(
                     relative_path=relative_path,
                     name=file_name,
-                    size=file_size
+                    size=file_size,
+                    type=FileType.File
                 )
 
                 file_entries.append(file_entry)
@@ -61,33 +67,41 @@ class FileDump(Serializable):
     
     @staticmethod
     def __compare(src_dump, dst_dump, allow_move=False, move_min_size=0) -> list[FileOperation]:
-        src_dump = copy.deepcopy(src_dump)
-        dst_dump = copy.deepcopy(dst_dump)
+        src_dump: FileDump = copy.deepcopy(src_dump)
+        dst_dump: FileDump = copy.deepcopy(dst_dump)
         dst_index = dst_dump.get_index()
         dst_name_index = dst_dump.get_name_index()
         operations = []
 
         for src_file in src_dump.files:
             #print(file)
-            dst_file = dst_index.get(src_file.relative_path)
+            dst_file: FileEntry | None = dst_index.get(src_file.relative_path)
             src_path = os.path.join(src_dump.path, src_file.relative_path)
             dst_path = os.path.join(dst_dump.path, src_file.relative_path)
-            dst_name_entry = dst_name_index.get(src_file.name)
+            dst_name_entry: list[FileEntry] | None = dst_name_index.get(src_file.name)
             if dst_file is not None:
                 dst_dump.files.remove(dst_file)
                 dst_name_entry.remove(dst_file)
                 if len(dst_name_entry) == 0:
                     del dst_index[src_file.relative_path]
 
-                if dst_file.size == src_file.size:
+                if (
+                        (src_file.type == FileType.Directory and dst_file.type == FileType.Directory)
+                        or (src_file.type == FileType.File and dst_file.type == FileType.File and dst_file.size == src_file.size)
+                    ):
                     operations.append(FileOperation('match', src_path, dst_path))
-                else:
-                    operations.append(FileOperation('delete', dst_path))
+                    continue
+                
+                operations.append(FileOperation('delete', dst_path))
+                
+                if src_file.type == FileType.File:
                     operations.append(FileOperation('copy', src_path, dst_path))
-                continue
+                else:
+                    operations.append(FileOperation('create', dst_path))
+                
 
-            if allow_move and src_file.size > move_min_size and dst_name_entry is not None:
-                dst_file = next((x for x in dst_name_entry if x.size == src_file.size), None)
+            if allow_move and src_file.type == FileType.File and src_file.size > move_min_size and dst_name_entry is not None:
+                dst_file = next((x for x in dst_name_entry if x.size == src_file.size and x.type == FileType.File), None)
                 if dst_file is not None:
                     dst_dump.files.remove(dst_file)
                     dst_name_entry.remove(dst_file)
@@ -99,7 +113,7 @@ class FileDump(Serializable):
 
             operations.append(FileOperation('copy', src_path, dst_path))
 
-        for dst_file in dst_dump.files:
+        for dst_file in reversed(dst_dump.files):
             dst_path = os.path.join(dst_dump.path, dst_file.relative_path)
             operations.append(FileOperation('delete', dst_path))
 
