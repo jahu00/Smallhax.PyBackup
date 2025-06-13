@@ -1,6 +1,5 @@
 import json
-from file_dump import FileDump
-from file_operations import FileOperations
+from classes import FileDump, FileOperations
 
 src_dump = FileDump.from_path("../temp")
 dst_dump = FileDump.from_path("../temp2")
