@@ -1,5 +1,5 @@
-from serializable import Serializable
-from file_operation import FileOperation
+from .serializable import Serializable
+from .file_operation import FileOperation
 class FileOperations(Serializable):
     def __init__(self, operations: list[FileOperation], index = 0):
         self.operations = operations

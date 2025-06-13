@@ -1,9 +1,9 @@
 import os
 import copy
-from serializable import Serializable
-from file_entry import FileEntry
-from file_type import FileType
-from file_operation import FileOperation
+from .serializable import Serializable
+from .file_entry import FileEntry
+from .file_type import FileType
+from .file_operation import FileOperation
 class FileDump(Serializable):
     def __init__(self, path, files: list[FileEntry]):
         self.path = path

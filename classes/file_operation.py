@@ -1,6 +1,7 @@
 import os
 import shutil
-from serializable import Serializable
+from .serializable import Serializable
+
 class FileOperation(Serializable):
     def __init__(self, operation, src, dst = None):
         self.src = src

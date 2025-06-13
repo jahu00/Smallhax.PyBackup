@@ -1,5 +1,5 @@
-from serializable import Serializable
-from file_type import FileType
+from .serializable import Serializable
+from .file_type import FileType
 
 class FileEntry(Serializable):
     def __init__(self, relative_path, name, size, type: FileType):
