@@ -1,4 +1,5 @@
 import json
+from enum import Enum
 
 class Serializable:
     def to_serializable(self):
@@ -27,6 +28,9 @@ class Serializable:
         
         if isinstance(value, Serializable):
             return value.to_serializable()
+        
+        if isinstance(value, Enum):
+            return value.value
         
         return value
     

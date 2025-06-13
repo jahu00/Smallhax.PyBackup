@@ -10,4 +10,9 @@ class FileEntry(Serializable):
 
     def __repr__(self):
         return f"FileEntry(path='{self.relative_path}', name='{self.name}', size={self.size})"
+    
+    @classmethod
+    def from_dict(cls, dict):
+        dict["type"] = FileType(dict["type"])
+        return cls(**dict)
    
