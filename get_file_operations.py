@@ -24,8 +24,16 @@ else:
     dst_dump = FileDump.from_path(args.dst)
 
 operations = src_dump.compare(dst_dump, args.move, args.min)
+keys = []
+groups = {}
 for key, group in groupby(operations.operations, lambda x: x.operation):
-   print(f"{len(list(group))} {key} operations")
+    if key not in keys:
+        keys.append(key)
+        groups[key] = []
+    groups[key] += list(group)
+   
+for key in keys:
+   print(f"{len(groups[key])} {key} operations")
 
 print(f"Saving output to {args.output}")
 operations.save_to_file(args.output)
