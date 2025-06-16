@@ -3,11 +3,11 @@ from itertools import groupby
 from classes import FileDump
 
 parser = argparse.ArgumentParser(description="Compares file dumps and prepares an operation list for syncing destination to source")
-parser.add_argument("--src", type=str, help="source path/JSON")
-parser.add_argument("--dst", type=str, help="destination path/JSON")
+parser.add_argument("--src", type=str, help="source path/JSON", required=True)
+parser.add_argument("--dst", type=str, help="destination path/JSON", required=True)
+parser.add_argument("--output", type=str, help="output JSON", required=False)
 parser.add_argument("--move", type=bool, help="allow move operation", default=True)
-parser.add_argument("--min", type=int, help="min file size for move operation (in bytes)", default=1048576)
-parser.add_argument("--output", type=str, help="output JSON")
+parser.add_argument("--min", type=int, help="min file size for move operation (in bytes)", default=1048576, required=False)
 
 args = parser.parse_args()
 
@@ -35,5 +35,6 @@ for key, group in groupby(operations.operations, lambda x: x.operation):
 for key in keys:
    print(f"{len(groups[key])} {key} operations")
 
-print(f"Saving output to {args.output}")
-operations.save_to_file(args.output)
+if args.output is not None:
+    print(f"Saving output to {args.output}")
+    operations.save_to_file(args.output)
