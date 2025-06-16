@@ -98,8 +98,10 @@ class FileDump(Serializable):
                 
                 if src_file.type == FileType.File:
                     operations.append(FileOperation('copy', src_path, dst_path))
+                    continue
                 else:
                     operations.append(FileOperation('create', dst_path))
+                    continue
                 
 
             if allow_move and src_file.type == FileType.File and src_file.size > move_min_size and dst_name_entry is not None:
@@ -113,7 +115,12 @@ class FileDump(Serializable):
                     operations.append(FileOperation('move', os.path.join(dst_dump.path, dst_file.relative_path), dst_path))
                     continue
 
-            operations.append(FileOperation('copy', src_path, dst_path))
+            if src_file.type == FileType.File:
+                operations.append(FileOperation('copy', src_path, dst_path))
+                continue
+            else:
+                operations.append(FileOperation('create', dst_path))
+                continue
 
         for dst_file in reversed(dst_dump.files):
             dst_path = os.path.join(dst_dump.path, dst_file.relative_path)
