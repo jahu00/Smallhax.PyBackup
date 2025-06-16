@@ -4,6 +4,8 @@ from .serializable import Serializable
 from .file_entry import FileEntry
 from .file_type import FileType
 from .file_operation import FileOperation
+from .file_operations import FileOperations
+
 class FileDump(Serializable):
     def __init__(self, path, files: list[FileEntry]):
         self.path = path
@@ -25,7 +27,7 @@ class FileDump(Serializable):
             entry.append(file)
         return index
     
-    def compare(self, dst_dump, allow_move=False, move_min_size=0) -> list[FileOperation]:
+    def compare(self, dst_dump, allow_move=False, move_min_size=0) -> FileOperations:
         return FileDump.__compare(self, dst_dump, allow_move, move_min_size)
 
     @staticmethod
@@ -66,7 +68,7 @@ class FileDump(Serializable):
         return FileDump(path, file_entries)
     
     @staticmethod
-    def __compare(src_dump, dst_dump, allow_move=False, move_min_size=0) -> list[FileOperation]:
+    def __compare(src_dump, dst_dump, allow_move=False, move_min_size=0) -> FileOperations:
         src_dump: FileDump = copy.deepcopy(src_dump)
         dst_dump: FileDump = copy.deepcopy(dst_dump)
         dst_index = dst_dump.get_index()
@@ -117,7 +119,7 @@ class FileDump(Serializable):
             dst_path = os.path.join(dst_dump.path, dst_file.relative_path)
             operations.append(FileOperation('delete', dst_path))
 
-        return operations
+        return FileOperations(operations)
     
     @classmethod
     def from_dict(cls, dict):
