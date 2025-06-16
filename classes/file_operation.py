@@ -13,15 +13,15 @@ class FileOperation(Serializable):
     
     def perform(self):
         match self.operation:
-            #nothing to do
             case "match":
+                #nothing to do
                 pass
             case "copy":
                 #self.ensure_path_exists()
                 shutil.copy2(self.src, self.dst)
             case "move":
                 #self.ensure_path_exists()
-                shutil.move(self.src_path, self.dst)
+                shutil.move(self.src, self.dst)
             case "delete":
                 os.remove(self.src)
             case "create":
