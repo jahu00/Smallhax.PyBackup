@@ -7,6 +7,7 @@ parser.add_argument("--src", type=str, help="source path/JSON dump", required=Tr
 parser.add_argument("--dst", type=str, help="destination path/JSON dump", required=True)
 parser.add_argument("--move", type=bool, help="allow move operation", default=True)
 parser.add_argument("--min", type=int, help="min file size for move operation (in bytes)", default=1048576, required=False)
+parser.add_argument("--confirmn", type=int, help="automatically confirm", default=False, required=False)
 
 args = parser.parse_args()
 
@@ -23,6 +24,7 @@ else:
     dst_dump = FileDump.from_path(args.dst)
 
 operations = src_dump.compare(dst_dump, args.move, args.min)
+print(" ")
 keys = []
 groups = {}
 for key, group in groupby(operations.operations, lambda x: x.operation):
@@ -34,6 +36,18 @@ for key, group in groupby(operations.operations, lambda x: x.operation):
 for key in keys:
    print(f"{len(groups[key])} {key} operations")
 
+operations.operations[:] = [x for x in operations.operations if not x.operation == "match"]
+print("Total operations: ", len(operations.operations))
+print(" ")
+
+if not args.confirmn:
+    confirm = input("Apply operations? (y/n) ").lower() == "y"
+
+    if not confirm:
+        print("Exiting without applying operations.")
+        exit()
+
+print(" ")
 print("Executing operations")
 operation_count = len(operations.operations)
 for operation in operations.operations:
