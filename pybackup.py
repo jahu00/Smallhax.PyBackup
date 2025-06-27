@@ -7,7 +7,7 @@ parser.add_argument("--src", type=str, help="source path/JSON dump", required=Tr
 parser.add_argument("--dst", type=str, help="destination path/JSON dump", required=True)
 parser.add_argument("--move", type=bool, help="allow move operation", default=True)
 parser.add_argument("--min", type=int, help="min file size for move operation (in bytes)", default=1048576, required=False)
-parser.add_argument("--confirmn", type=int, help="automatically confirm", default=False, required=False)
+parser.add_argument("--confirm", type=int, help="automatically confirm", default=False, required=False)
 
 args = parser.parse_args()
 
@@ -40,7 +40,7 @@ operations.operations[:] = [x for x in operations.operations if not x.operation 
 print("Total operations: ", len(operations.operations))
 print(" ")
 
-if not args.confirmn:
+if not args.confirm:
     confirm = input("Apply operations? (y/n) ").lower() == "y"
 
     if not confirm:
