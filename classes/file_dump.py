@@ -85,7 +85,9 @@ class FileDump(Serializable):
                 dst_dump.files.remove(dst_file)
                 dst_name_entry.remove(dst_file)
                 if len(dst_name_entry) == 0:
-                    del dst_index[src_file.relative_path]
+                    del dst_name_index[dst_file.name]
+
+                del dst_index[dst_file.relative_path]
 
                 if (
                         (src_file.type == FileType.Directory and dst_file.type == FileType.Directory)
@@ -110,7 +112,9 @@ class FileDump(Serializable):
                     dst_dump.files.remove(dst_file)
                     dst_name_entry.remove(dst_file)
                     if len(dst_name_entry) == 0:
-                        del dst_index[src_file.relative_path]
+                        del dst_name_index[src_file.name]
+
+                    del dst_index[dst_file.relative_path]
 
                     operations.append(FileOperation('move', os.path.join(dst_dump.path, dst_file.relative_path), dst_path))
                     continue
