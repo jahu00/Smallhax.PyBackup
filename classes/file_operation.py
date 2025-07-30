@@ -23,7 +23,10 @@ class FileOperation(Serializable):
                 #self.ensure_path_exists()
                 shutil.move(self.src, self.dst)
             case "delete":
-                os.remove(self.src)
+                if os.path.isdir(self.src):
+                    os.rmdir(self.src)
+                else:
+                    os.remove(self.src)
             case "create":
                 os.makedirs(self.src)
             case _:
