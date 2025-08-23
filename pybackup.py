@@ -3,6 +3,33 @@ import os
 from itertools import groupby
 from classes import FileDump
 
+def readable_size(size, step = 1000):
+    multiplier = 1
+    output_size = size
+    while output_size > step:
+        output_size /= step
+        multiplier += 1
+        if multiplier == 7:
+            break
+    suffix = "?"
+    match multiplier:
+        case 1:
+            suffix = "B"
+        case 2:
+            suffix = "KB"
+        case 3:
+            suffix = "MB"
+        case 4:
+            suffix = "GB"
+        case 5:
+            suffix = "GB"
+        case 6:
+            suffix = "TB"
+        case 7:
+            suffix = "TB"
+            
+    return str(output_size) + " " + suffix
+
 parser = argparse.ArgumentParser(description="Sunchronizes destination path with source")
 parser.add_argument("--src", type=str, help="source path/JSON dump", required=True)
 parser.add_argument("--dst", type=str, help="destination path/JSON dump", required=True)
@@ -68,16 +95,15 @@ copy_size = sum(operation.size for operation in operations.operations if operati
 delete_size = sum(operation.size or 0 for operation in operations.operations if operation.operation == "delete")
 move_size = sum(operation.size for operation in operations.operations if operation.operation == "move")
 
-# TODO: Reduce to KB/MB/GB/TB as needed
-print("Copy: ", copy_size, " B")
-print("Delete: ", delete_size, " B")
-print("Move: ", move_size, " B")
+print("Copy: ", readable_size(copy_size))
+print("Delete: ", readable_size(delete_size))
+print("Move: ", readable_size(move_size))
 print(" ")
 
 dst_stat = os.statvfs(dst_dump.path)
 free_space = dst_stat.f_bavail * dst_stat.f_bsize
 
-print("Free space: ", move_size, " B")
+print("Free space: ", readable_size(free_space))
 print(" ")
 
 if not args.confirm:
