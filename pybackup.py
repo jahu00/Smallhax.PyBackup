@@ -1,15 +1,16 @@
 import argparse
 import os
+import time
 from itertools import groupby
 from classes import FileDump
 
-def readable_size(size, step = 1000):
+def readable_size(size, step = 1000, max_multiplier = 7):
     multiplier = 1
     output_size = size
     while output_size > step:
         output_size /= step
         multiplier += 1
-        if multiplier == 7:
+        if multiplier == max_multiplier:
             break
     suffix = "?"
     match multiplier:
@@ -26,9 +27,9 @@ def readable_size(size, step = 1000):
         case 6:
             suffix = "TB"
         case 7:
-            suffix = "TB"
+            suffix = "PB"
             
-    return str(output_size) + " " + suffix
+    return str(round(output_size, 2)) + " " + suffix
 
 parser = argparse.ArgumentParser(description="Sunchronizes destination path with source")
 parser.add_argument("--src", type=str, help="source path/JSON dump", required=True)
@@ -106,6 +107,9 @@ free_space = dst_stat.f_bavail * dst_stat.f_bsize
 print("Free space: ", readable_size(free_space))
 print(" ")
 
+if free_space < copy_size:
+    print("WARNING: Not enough free space to complete all copy operations!")
+
 if not args.confirm:
     confirm = input("Apply operations? (y/n) ").lower() == "y"
 
@@ -116,15 +120,19 @@ if not args.confirm:
 print(" ")
 print("Executing operations")
 
+# TODO: Report ETA and elapsed time
+
 for operation in operations.operations:
     operations.index += 1
     progress = f"{operations.index}/{operation_count}"
+    start_time = None
     match operation.operation:
         case "match":
             print(f"{progress} - Skipping {operation.src}")
             pass
         case "copy":
             print(f"{progress} - Copying {operation.src} to {operation.dst}")
+            start_time = time.time()
         case "move":
             print(f"{progress} - Moving {operation.src} to {operation.dst}")
         case "delete":
@@ -135,3 +143,9 @@ for operation in operations.operations:
             raise Exception(f"Unsupported operation {operation.operation} on file {operation.src}")
     # TODO: Measure time and report MB/s, possibly average and do it only for copy operations   
     operation.perform()
+    if start_time:
+        end_time = time.time()
+        execution_time = end_time - start_time
+        if execution_time > 0:
+            speed = operation.size / execution_time
+            print(readable_size(speed) + "/s")
