@@ -23,7 +23,7 @@ def readable_size(size, step = 1000, max_multiplier = 6):
         case 4:
             suffix = "GB"
         case 5:
-            suffix = "GB"
+            suffix = "TB"
         case 6:
             suffix = "PB"
             
