@@ -96,10 +96,10 @@ class FileDump(Serializable):
                     operations.append(FileOperation('match', src_path, dst_path))
                     continue
                 
-                operations.append(FileOperation('delete', dst_path))
+                operations.append(FileOperation('delete', dst_path, size=dst_file.size))
                 
                 if src_file.type == FileType.File:
-                    operations.append(FileOperation('copy', src_path, dst_path))
+                    operations.append(FileOperation('copy', src_path, dst_path, size=src_file.size))
                     continue
                 else:
                     operations.append(FileOperation('create', dst_path))
@@ -116,11 +116,11 @@ class FileDump(Serializable):
 
                     del dst_index[dst_file.relative_path]
 
-                    operations.append(FileOperation('move', os.path.join(dst_dump.path, dst_file.relative_path), dst_path))
+                    operations.append(FileOperation('move', os.path.join(dst_dump.path, dst_file.relative_path), dst_path, size=dst_file.size))
                     continue
 
             if src_file.type == FileType.File:
-                operations.append(FileOperation('copy', src_path, dst_path))
+                operations.append(FileOperation('copy', src_path, dst_path, size=src_file.size))
                 continue
             else:
                 operations.append(FileOperation('create', dst_path))
@@ -128,7 +128,7 @@ class FileDump(Serializable):
 
         for dst_file in reversed(dst_dump.files):
             dst_path = os.path.join(dst_dump.path, dst_file.relative_path)
-            operations.append(FileOperation('delete', dst_path))
+            operations.append(FileOperation('delete', dst_path, size=dst_file.size))
 
         return FileOperations(operations)
     
