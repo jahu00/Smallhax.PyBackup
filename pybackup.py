@@ -4,7 +4,7 @@ import time
 from itertools import groupby
 from classes import FileDump
 
-def readable_size(size, step = 1000, max_multiplier = 7):
+def readable_size(size, step = 1000, max_multiplier = 6):
     multiplier = 1
     output_size = size
     while output_size > step:
@@ -25,8 +25,6 @@ def readable_size(size, step = 1000, max_multiplier = 7):
         case 5:
             suffix = "GB"
         case 6:
-            suffix = "TB"
-        case 7:
             suffix = "PB"
             
     return str(round(output_size, 2)) + " " + suffix
@@ -148,4 +146,4 @@ for operation in operations.operations:
         execution_time = end_time - start_time
         if execution_time > 0:
             speed = operation.size / execution_time
-            print(readable_size(speed) + "/s")
+            print(readable_size(speed, max_multiplier=3) + "/s")
